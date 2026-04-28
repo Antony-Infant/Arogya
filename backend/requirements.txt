@@ -1,0 +1,51 @@
+# Django & REST Framework
+Django
+djangorestframework
+django-cors-headers
+PyMySQL
+django-filter
+djangorestframework-simplejwt
+python-decouple
+
+# LLM & AI
+langchain
+langchain-community
+langchain-huggingface
+sentence-transformers
+chromadb
+ollama
+
+# Causal AI
+dowhy
+networkx
+pgmpy
+
+# Voice & Translation
+openai-whisper
+gTTS
+pydub
+
+# PDF Reports
+reportlab
+Pillow
+
+# WhatsApp
+twilio
+
+# Antifragile & Task Queue
+evidently
+celery
+redis
+
+# Data Processing
+pandas
+numpy
+scikit-learn
+
+# Utilities
+requests
+python-dotenv
+gunicorn
+pypdf
+langchain-text-splitters
+langchain-chroma
