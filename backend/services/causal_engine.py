@@ -154,6 +154,10 @@ class CausalEngine:
                 return 0.6
         return 0.0
 
+    def _symptom_similarity(self, user_sym: str, disease_sym: str) -> float:
+        """Alias for _symptom_match."""
+        return self._symptom_match(user_sym, disease_sym)
+
     def _build_explanation(self, disease_row, matched, weights) -> str:
         name = disease_row['disease_name']
         explanation = f"Based on causal analysis, {name} is predicted because: "

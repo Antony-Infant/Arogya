@@ -1,7 +1,4 @@
-"""
-Arogya Chat Engine - Multi-turn conversation, LLM decides diagnosis timing.
-All errors caught gracefully - user always gets a response.
-"""
+
 import logging
 from .llm_service import OllamaService
 from .causal_engine import CausalEngine
@@ -44,6 +41,8 @@ class ChatEngine:
         self.causal = CausalEngine()
         self.rag = RAGEngine()
         self.extractor = SymptomExtractor()
+        self._lat = None  # set by views.py
+        self._lng = None
 
     def process_message(self, session, content, input_type, user):
         """Main entry. Always returns a dict with 'message' key. Never crashes."""
@@ -105,6 +104,10 @@ class ChatEngine:
             except Exception as e:
                 logger.warning(f"Readiness check failed: {e}")
 
+        # Bug 2 fix: Find hospitals early (during conversation, not just at diagnosis)
+        # This way, as soon as the user has granted location, the frontend can show nearby doctors
+        hospitals_early = self._find_hospitals(user)
+
         # Multi-turn doctor conversation
         messages = [{'role': 'system', 'content': SYSTEM_DOCTOR + '\n\n' + profile}]
         for m in db_msgs[-14:]:
@@ -116,7 +119,7 @@ class ChatEngine:
             'diagnosis': None,
             'symptoms': [s['name'] for s in new_syms],
             'follow_up_needed': True,
-            'hospitals': [],
+            'hospitals': hospitals_early,
             'tts_url': None,
         }
 
@@ -320,13 +323,12 @@ class ChatEngine:
         }
 
     def _find_hospitals(self, user):
-        if not user:
-            return []
-        lat = getattr(user, 'location_lat', None)
-        lng = getattr(user, 'location_lng', None)
-        if not lat or not lng:
-            return []
         try:
+            lat = self._lat or getattr(user, 'location_lat', None)
+            lng = self._lng or getattr(user, 'location_lng', None)
+            if not lat or not lng:
+                logger.info("No GPS coords - hospitals skipped")
+                return []
             from .hospital_service import find_nearby_hospitals
             return find_nearby_hospitals(float(lat), float(lng))
         except Exception as e:
